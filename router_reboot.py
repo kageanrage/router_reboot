@@ -59,3 +59,12 @@ if connection_status != 0:  # (NB change to 0 for live mode)
     driver = webdriver.Chrome(chrome_path, options=chrome_options)  # specify webdriver (chrome via selenium)
 
     login_router_admin()
+
+
+# TODO: take out the dodgy / legit variable stuff that was used for testing
+# TODO: make internet check more robust
+# TODO: make result logic more sensible
+# TODO: increase amount of info in log file
+# TODO: add comments
+# TODO: schedule in windows task manager
+# TODO: think about how/when to send email (as net will be down). Perhaps this means leaving program open til net is back and then re-testing / emailing
