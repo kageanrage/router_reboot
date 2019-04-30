@@ -1,10 +1,10 @@
-import requests, logging, os, time, sys
+import logging, os, time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from config import Config   # this imports the config file where the private data sits
 
 
-# this new logging code designed to output DEBUG to console, and INFO (and above) to file
+# this logging code designed to output DEBUG to console, and INFO (and above) to file
 logger = logging.getLogger('log')  # 'log' can be anything - it's just the name
 logger.setLevel(logging.DEBUG)
 # create file handler which logs only 'INFO and above' messages
@@ -26,13 +26,22 @@ cfg = Config()  # create an instance of the Config class, essentially brings pri
 os.chdir(cfg.cwd)  # change the current working directory to the one stipulated in config file
 
 
-def check_internet_connection():
-    dodgy = "ping 123.456.789.102"
-    legit = "ping google.com"
-    # print(os.system(legit))
-    result = os.system(legit)  # result = 0 if net is up or 1 if net is down
-    logging.debug(result)
-    return result
+def check_internet_connection(sites):
+    results = []
+    result = os.system("ping " + sites[0])  # result = 0 if net is up or 1 if net is down
+    # logger.debug(result)
+    results.append(result)
+    if result == '1':
+        result_2 = os.system("ping " + sites[1])  # result = 0 if net is up or 1 if net is down
+        logger.debug(result_2)
+        results.append(result_2)
+        result_3 = os.system("ping " + sites[2])  # result = 0 if net is up or 1 if net is down
+        logger.debug(result_3)
+        results.append(result_3)
+    if 0 in results:
+        return 'up'
+    else:
+        return 'down'
 
 
 def login_router_admin():
@@ -49,10 +58,13 @@ def login_router_admin():
     logger.info('Initiating router reboot')
 
 
-connection_status = check_internet_connection()  # will be 0 if net is up or 1 if net is down
+sites_to_check = ["google.com", "8.8.4.4", "8.8.8.8"]  # for live
+dodgy_sites_to_check = ["asdasdasd", "asdwdaqwd", "asdasd"]  # for testing
 
+result_of_check = check_internet_connection(sites_to_check)  # will be 'up' or 'down'
+logger.info(f"Net is {result_of_check}")
 
-if connection_status != 0:  # (NB change to 0 for live mode)
+if result_of_check == 'down':
     chrome_path = cfg.chrome_path  # location of chromedriver.exe on local drive
     chrome_options = Options()
     chrome_options.add_argument("--disable-notifications")  # to disable notifications popup in Chrome (affects Zoho page)
@@ -61,10 +73,5 @@ if connection_status != 0:  # (NB change to 0 for live mode)
     login_router_admin()
 
 
-# TODO: take out the dodgy / legit variable stuff that was used for testing
-# TODO: make internet check more robust
-# TODO: make result logic more sensible
-# TODO: increase amount of info in log file
-# TODO: add comments
 # TODO: schedule in windows task manager
 # TODO: think about how/when to send email (as net will be down). Perhaps this means leaving program open til net is back and then re-testing / emailing
